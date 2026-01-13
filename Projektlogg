@@ -117,62 +117,86 @@ Spread (points): 0.8000
 Commission RT (points): 0.1000
 Detta är ett godkänt out of sample. Vi ser att profit factor minskas lite samtidigt som expectancy ökas rejält vilket kan förklaras av det faktum att det skett större daily-rörelse efter 2020, pågrund av covid och post covid. Vilket också förklarar den rejäla drawdownen.
 Men det viktigast är att profit factor fortfarande ligger över 3 i vårat out of sample test. Så resultaten är i helhet sämre än in sample, vilket är förväntat men fullt acceptabelt. Vi ser också att drawdown kommer från få, stora förlorare där Max Losing Streak = 2 trades.
-Detta är det vi vill se i ett mean reversion system. Nu har vi bekräftat edge, nästa steg är att fundera hur vi använder strategin på rätt sätt. Vi kommer att implementera en kaptialmodell, vilket gör det lättare att räkna ut nyckelkvoter, sharpe, sortino och calmar. 
-Samtidigt som vi kan analysera procentsatser i drawdown, drawdown recovery-tid och returns. Eftersom vi inte har en definierad stop loss i strategin så kan vi inte ha en fast risk-per-trade vilket gör att det blir svårt att räkna ut kapitalförändring. Bästa lösningen här 
-är att lägga en fixed exposure på 10-20% där varje trade använder en fast andel av aktuellt kapital och pnl skalar linjärt med prisrörelsen, vi börjar med 20% fixed exposure:
-Equity Start: 50000.0000
-Equity End: 56617.0592
-CAGR: 0.0090
-Max Drawdown (%): -5.8305
-Sharpe (ann.): 0.5058
-Sortino (ann.): 0.2260
-Calmar: 0.1539
-Låg Sharpe och sortino men detta är lugnt eftersom strategin har time-in-market. Så lägre kvoter här innebär att kapitalet sällan jobbar, inte att strategin är dålig. Vi ser en väldigt låg drawdown vid 20% exposure, detta är konservativt så vi kommer öka exposure till 
-40-50%. CAGR är pckså lågt, men ännu en gång är detta inte ett problem eftersom strategin är kapital snål. Slutsatsen av dessa tester är att strategin är en låg-risk alpha sleeve som kan skalas i exposure, kombineras i en portfölj av andra okorrelerade strategier och
-köras parallellt. Vi testar 50% nu:
-Equity Start: 50000.0000
-Equity End: 67971.2489
-CAGR: 0.0223
-Max Drawdown (%): -14.5707
-Sharpe (ann.): 0.5003
-Sortino (ann.): 0.2234
-Calmar: 0.1532
-fina siffror som bekräftar att strategin skalas linjärt i exposure. Denna strategin passar perfekt in som en kapitalbevarande allokering i en diversifierad portfölj. Det är inte meningen att denna typ av strategi ska ha högt sharpe eller väldigt höga returns, men 
-vi kan testa strategin på andra marknader som liknar sp500 för att eventuellt diversifiera strategin. generera fler trades och därmed sänka den totala risken samtidigt som sharpe bör gå upp (detta är dock inte målet).
+Detta är det vi vill se i ett mean reversion system. Tanken är att denna strategi ska handla på us equitiets i paralellt samarbete med en trendföljande strategi som handlar sp500, us100 och us30. Därför testar vi dessa marknader hela perioden 2012 - 2025. På detta sätt
+maximerar vi också vårat dataset.
+US500:
+Trades: 186
+Total PnL (points): 1604.7391
+Gross Profit: 4017.4581
+Gross Loss: -2412.7190
+Profit Factor: 1.6651
+Winrate: 0.6882
+Avg Win: 31.3864
+Avg Loss: -41.5986
+Expectancy (avg/trade): 8.6276
+Max Drawdown (points): 498.3590
+Max Losing Streak (trades): 3
+Sharpe (trade-level): 2.0395
+Spread (points): 0.8000
+Commission RT (points): 0.1000
 US30:
-Equity Start: 50000.0000 
-Equity End: 68084.6198 
-CAGR: 0.0228 
-Max Drawdown (%): -5.7298 
-Sharpe (ann.): 0.6551 
-Sortino (ann.): 0.3161 
-Calmar: 0.3980
-USTECH:
-Equity Start: 50000.0000
-Equity End: 82770.1613
-CAGR: 0.0369
-Max Drawdown (%): -12.6164
-Sharpe (ann.): 0.6823
-Sortino (ann.): 0.3218
-Calmar: 0.2926
-Vi kombinerar marknaderna och viktar mer mot USTECH och US30. USTECH: 40%, US30: 40%, US500: 20%
---- PORTFOLIO METRICS ---
-Equity Start: 50000.0000
-Equity End: 109357.0077
-CAGR: 0.0579
-Max DD (%): -17.6467
-Sharpe: 0.7193
-Sortino: 0.4095
-Calmar: 0.3279
-Siste men inte minst kör vi en monte carlo simulation.
-50% DD: -9.7%
-75% DD: -8.3%
-90% DD: -7.3%
-95% DD: -6.8%
-99% DD: -6.1%
-P(DD ≤ -15%) = 4.3%
-P(DD ≤ -20%) = 0.2%
-P(DD ≤ -25%) = 0.0%
-P(DD ≤ -30%) = 0.0%
-Median End Equity: 82770.16125734261
-5% worst End Equity: 82770.1612573424
+Trades: 177
+Total PnL (points): 11767.1757
+Gross Profit: 27507.0497
+Gross Loss: -15739.8740
+Profit Factor: 1.7476
+Winrate: 0.6158
+Avg Win: 252.3583
+Avg Loss: -231.4687
+Expectancy (avg/trade): 66.4812
+Max Drawdown (points): 1727.2990
+Max Losing Streak (trades): 4
+Sharpe (trade-level): 2.5393
+Spread (points): 0.8000
+Commission RT (points): 0.1000
+US100:
+Trades: 186
+Total PnL (points): 8481.9282
+Gross Profit: 16882.3542
+Gross Loss: -8400.4260
+Profit Factor: 2.0097
+Winrate: 0.7366
+Avg Win: 123.2289
+Avg Loss: -171.4373
+Expectancy (avg/trade): 45.6018
+Max Drawdown (points): 1490.3110
+Max Losing Streak (trades): 3
+Sharpe (trade-level): 2.6837
+Spread (points): 0.8000
+Commission RT (points): 0.1000
+Allt här ser bra ut som förväntat, nästa steg är att kombinera marknaderna i en portfölj där vi går över att räkna i pengar. Marknaderna kommer i början ha lika vikt, alltså 1/3 och vi definierar risk till exposure = 100%. Så varje marknad kommer ha tillgång till
+33% av kapitalet:
+StartCapital: 50000.0000
+EndEquity: 86012.6580
+TotalPnL_Cash: 36012.6580
+MaxDrawdown_Cash: 4517.6800
+MaxDrawdown_Pct: 0.0613
+ExposurePctTarget: 1.0000
+AllocationMode: fixed_equal
+MinContracts: 0
+MaxGrossExposurePctEquity: 0.9664
+AvgGrossExposurePctEquity: 0.3228
+MaxOpenPositions: 3
+PortfolioTradesTaken: 448
+PortfolioPF_Cash: 2.0221
+PortfolioWinrate_Cash: 0.7210
+PortfolioExpectancy_Cash: 80.3854'
+Helt rimliga resultat givet låg exposure, låg max drawdown på -6.13%. Max gross exposure på 0.97 vilket innebär att vi når target när flera marknader är aktiva även fast average gross exposure är 0.32. Vi testar 2.0 exposure: 
+StartCapital: 50000.0000
+EndEquity: 178115.0931
+TotalPnL_Cash: 128115.0931
+MaxDrawdown_Cash: 16014.6120
+MaxDrawdown_Pct: 0.1396
+ExposurePctTarget: 2.0000
+AllocationMode: fixed_equal
+MinContracts: 0
+MaxGrossExposurePctEquity: 1.9798
+AvgGrossExposurePctEquity: 0.7274
+MaxOpenPositions: 3
+PortfolioTradesTaken: 549
+PortfolioPF_Cash: 1.8796
+PortfolioWinrate_Cash: 0.6976
+PortfolioExpectancy_Cash: 233.3608
+Större returns och högre average exposure på bekostnad av högre drawdown på -13.96%. Detta är fortfarande hanterbart, så nu är det dags för viktoptimering. Vi kommer börja med att ta fram ERC värden som visar hur vi ska vikta marknaderna för att varje marknad ska bidra
+med lika mycket volatilitet (risk).
+
