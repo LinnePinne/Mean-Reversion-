@@ -166,37 +166,68 @@ Spread (points): 0.8000
 Commission RT (points): 0.1000
 Allt här ser bra ut som förväntat, nästa steg är att kombinera marknaderna i en portfölj där vi går över att räkna i pengar. Marknaderna kommer i början ha lika vikt, alltså 1/3 och vi definierar risk till exposure = 100%. Så varje marknad kommer ha tillgång till
 33% av kapitalet:
-StartCapital: 50000.0000
-EndEquity: 86012.6580
-TotalPnL_Cash: 36012.6580
-MaxDrawdown_Cash: 4517.6800
-MaxDrawdown_Pct: 0.0613
-ExposurePctTarget: 1.0000
-AllocationMode: fixed_equal
-MinContracts: 0
-MaxGrossExposurePctEquity: 0.9664
-AvgGrossExposurePctEquity: 0.3228
-MaxOpenPositions: 3
-PortfolioTradesTaken: 448
-PortfolioPF_Cash: 2.0221
-PortfolioWinrate_Cash: 0.7210
-PortfolioExpectancy_Cash: 80.3854'
-Helt rimliga resultat givet låg exposure, låg max drawdown på -6.13%. Max gross exposure på 0.97 vilket innebär att vi når target när flera marknader är aktiva även fast average gross exposure är 0.32. Vi testar 2.0 exposure: 
-StartCapital: 50000.0000
-EndEquity: 178115.0931
-TotalPnL_Cash: 128115.0931
-MaxDrawdown_Cash: 16014.6120
-MaxDrawdown_Pct: 0.1396
-ExposurePctTarget: 2.0000
-AllocationMode: fixed_equal
-MinContracts: 0
-MaxGrossExposurePctEquity: 1.9798
-AvgGrossExposurePctEquity: 0.7274
-MaxOpenPositions: 3
-PortfolioTradesTaken: 549
-PortfolioPF_Cash: 1.8796
-PortfolioWinrate_Cash: 0.6976
-PortfolioExpectancy_Cash: 233.3608
-Större returns och högre average exposure på bekostnad av högre drawdown på -13.96%. Detta är fortfarande hanterbart, så nu är det dags för viktoptimering. Vi kommer börja med att ta fram ERC värden som visar hur vi ska vikta marknaderna för att varje marknad ska bidra
-med lika mycket volatilitet (risk).
+Equity Start: 50000.0000
+Equity End: 92097.6535
+CAGR: 0.0449
+Max Drawdown %: -17.9051
+Sharpe (ann.): 0.5511
+Calmar: 0.2507
+Avg Daily Return: 0.0002
+Daily Vol: 0.0044
+Sanity: Open positions at end: 1
+Avg gross exposure %: 16.4096774805767
+Max gross exposure %: 100.00000000000003
+Max DD% (MTM equity): -17.91%
+Max DD% (Closed trades only): -8.91%
+Helt rimliga resultat givet låg exposure, låg max drawdown på -8.91%. Max gross exposure på 100% vilket innebär att vi når target när flera marknader är aktiva även fast average gross exposure är 16%. Vi testar 2.0 exposure: 
+Equity Start: 50000.0000
+Equity End: 164455.8211
+CAGR: 0.0894
+Max Drawdown %: -34.9407
+Sharpe (ann.): 0.5602
+Calmar: 0.2557
+Avg Daily Return: 0.0003
+Daily Vol: 0.0091
+Sanity: Open positions at end: 1
+Avg gross exposure %: 33.032448086719576
+Max gross exposure %: 216.37875552012633
+Max DD% (MTM equity): -34.94%
+Max DD% (Closed trades only): -17.66%
+Större returns och högre average exposure på bekostnad av högre drawdown på -17.66%. Detta är fortfarande hanterbart, så nu är det dags för viktoptimering. Denna process kommer börja med att bestämma fasta vikter, detta kan göras genom t.ex. ERC. Sedan kommer portföljen
+köras med de vikter men viktigast är nästa steg, där vi block bootstrappar marknaderna med dessa vikter för att kolla på distribution av nyckeltal. Första steget är alltså att bestämma fasta vikter. Vi kommer börja med att ta fram ERC värden som visar hur vi ska vikta 
+marknaderna för att varje marknad ska bidra med lika mycket volatilitet (risk).
+ERC weights (based on daily close returns):
+US500: 0.3421
+US100: 0.2876
+US30: 0.3703
+Vi testar att köra portföljen med dessa vikter:
+Equity Start: 50000.0000
+Equity End: 158392.1761
+CAGR: 0.0864
+Max Drawdown %: -33.3585
+Sharpe (ann.): 0.5567
+Calmar: 0.2591
+Avg Daily Return: 0.0003
+Daily Vol: 0.0088
+Sanity: Open positions at end: 1
+Avg gross exposure %: 33.014442905539745
+Max gross exposure %: 215.82810313348517
+Max DD% (MTM equity): -33.36%
+Max DD% (Closed trades only): -16.97%
+ERC vikterna ger lägre avkastning, marginellt lägre drawdown, marginellt lägre volatilitet, marginellt lägre sharpe. ERC minskar portföljens volatilitetsbidrag per marknad, men förbättrar inte riskjusterad avkastning. Vi vet sedan innan att risken främst domineras av 
+MAE (Maximum Adverse Excursion), som mäter största intratrade drawdown -34.94% vilket skiljer väldigt mycket från drawdown på stängda positioner (realiserad drawdown) på -17.66%. Equal weights presterar alltså lika bra eller lite bättre än ERC weights. Vi går över och
+block bootstrappar båda alternativen. 
+BOOTSTRAP DISTRIBUTIONS (Fixed Weights: Equal):
+Sharpe {'mean': 0.5736526504503828, 'median': 0.5630064084185229, 'p05': 0.24047707176604818, 'p95': 0.9340325834525994}
+CAGR {'mean': 0.09242766302319134, 'median': 0.09237837716817843, 'p05': 0.03243246431941812, 'p95': 0.15071899023821275}
+MaxDD {'mean': -0.32185180461421553, 'median': -0.3214480710165471, 'p05': -0.49704431051126124, 'p95': -0.1614049359865901}
+Calmar {'mean': 0.347899655985207, 'median': 0.29194245093334104, 'p05': 0.07486191255893526, 'p95': 0.8167388049841323}
+EndEquity {'mean': 3.6771551775578324, 'median': 3.358836705902383, 'p05': 1.5488527540369508, 'p95': 6.838707459465144}
+BOOTSTRAP DISTRIBUTIONS (Fixed Weights: ERC):
+Sharpe {'mean': 0.568245568315576, 'median': 0.5580558335880812, 'p05': 0.23534346805898082, 'p95': 0.9260264004594321}
+CAGR {'mean': 0.08954648507793043, 'median': 0.08932419236795652, 'p05': 0.030924107363825438, 'p95': 0.14628167266028955}
+MaxDD {'mean': -0.3127463769488503, 'median': -0.31126414668941516, 'p05': -0.48222858673164204, 'p95': -0.15985555588803652}
+Calmar {'mean': 0.3449018688965721, 'median': 0.2905441221138262, 'p05': 0.07471879837777654, 'p95': 0.8049666717356251}
+EndEquity {'mean': 3.5287313514248164, 'median': 3.228150647637745, 'p05': 1.5203863961551167, 'p95': 6.477594791775985}
+Bootstrappan säger i princip exakt samma som baseline visade.
 
