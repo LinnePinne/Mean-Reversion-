@@ -229,5 +229,7 @@ CAGR {'mean': 0.08954648507793043, 'median': 0.08932419236795652, 'p05': 0.03092
 MaxDD {'mean': -0.3127463769488503, 'median': -0.31126414668941516, 'p05': -0.48222858673164204, 'p95': -0.15985555588803652}
 Calmar {'mean': 0.3449018688965721, 'median': 0.2905441221138262, 'p05': 0.07471879837777654, 'p95': 0.8049666717356251}
 EndEquity {'mean': 3.5287313514248164, 'median': 3.228150647637745, 'p05': 1.5203863961551167, 'p95': 6.477594791775985}
-Bootstrappan säger i princip exakt samma som baseline visade. 
+Bootstrappen säger i princip exakt samma som baseline visade, ERC är klar vinnare. Vi gör samtidigt valert att gå tillbaka till 100% exposure eftersom strategin ska kombioneras med en trendföljande strategi och handla genom ftmo konto där förlust regler hindrar oss 
+från att skala upp för mycket. Strategin är nu färdigbyggd, nästa steg är integration med trendföljande strategin. Mean reversion strategin vi nu utvecklat ser ut såhör: Long only när pris ligger över EMA_slow(250) och under EMA_fast(20), samtidigt som pris stänger 
+i lägsta 20% av dagens range. Lika vikter över alla tre marknader, US500, US100 och US30 med exposure på 100%.
 
