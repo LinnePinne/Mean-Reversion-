@@ -1,0 +1,41 @@
+Jag ser ingen uppenbar entry-lookahead: signalen görs på dagens close/EMA/range och entry sker nästa open med spread/slippage. Det är bra. Koden använder dessutom nästa bars open för både entry och exit-fill, vilket är mer realistiskt än close-fill.
+
+Men jag hade inte godkänt strategin som “färdigrobust” ännu.
+
+Viktigaste riskerna:
+
+ERC-vikterna är lookahead/data leakage
+Vikterna beräknas på hela historiken och används sedan på samma historik. Det gör portföljresultatet för optimistiskt. ERC måste beräknas på träningsperiod, sedan appliceras OOS eller rullande/walk-forward.
+Parametervalet är delvis curve-fit
+Ni testar flera EMA-kombinationer och väljer bästa fast(20)/slow(250). Att alla varianter har edge minskar risken, men påståendet “detta är inte curve-fitting” är för starkt. Loggen visar uttryckligen att bästa kombination väljs efter in-sample-test.
+OOS-perioden har redan använts i beslutsprocessen
+2020–2025 användes för validering, men sedan används hela 2012–2025 i portföljtest och slutsatser. Då är OOS inte längre helt “orörd”. Ni behöver en ny untouched holdout, eller walk-forward.
+Exit-logiken kan vara semantiskt farlig
+Koden säger: exit om dagens high >= dagens EMA_fast, men EMA_fast beräknas med dagens close. Eftersom fill sker nästa open är det inte direkt lookahead-fill, men “touch av EMA under dagen” är inte realtidsbar om EMA-värdet först är känt vid close. Jag skulle formulera regeln som: “om dagens high överstiger EMA beräknad vid close, exit nästa open” — inte som intraday touch.
+Max gross exposure kan överskrida cap
+Loggen visar max gross exposure över 216% trots cap 200%. Det kan ske när equity faller efter entry, men för FTMO/regler spelar faktisk löpande exposure/drawdown roll. Ni bör mäta daily loss, max intraday DD, margin usage och worst open-risk, inte bara close-to-close MTM.
+Closed-trade DD är missvisande
+Ni gör rätt som tittar på MTM DD. Closed-trade DD underskattar risk kraftigt i mean reversion. Den ska nästan ignoreras som riskmått.
+Bootstrappen är bra men otillräcklig
+Block bootstrap är ett plus. Men den resamplar redan valda marknader/parametrar och fångar inte modellvalsrisken. Den säger mer om “om denna strategi är sann” än “hur stor är risken att vi hittat en slump-edge”.
+
+Min professionella slutsats: processen är klart bättre än nybörjarnivå, särskilt med kostnader, slippage, MTM equity, portfölj och bootstrap. Men den största svagheten är data leakage via ERC/full-sample portföljval och för optimistisk slutsats efter parameterjämförelser.
+
+Nästa steg bör vara:
+
+Walk-forward-test:
+2012–2016 train → 2017 test
+2012–2017 train → 2018 test
+… fortsätt till 2025.
+EMA/pullback/vikter får bara väljas med tidigare data.
+
+Robusthetsmatris:
+Testa EMA_fast 10–30, EMA_slow 150–300, pullback_frac 0.10–0.35. Strategin ska fungera som en bred platå, inte bara vid 20/250/0.20.
+
+Stressa kostnader:
+Kör 1x, 2x, 3x spread/slippage. En daglig mean reversion-strategi bör inte kollapsa vid 2x kostnad.
+
+Inför hårda riskmått:
+Max intratrade DD, worst open loss, daily loss breach, margin usage, gap risk, korrelation i krisdagar.
+
+Kort sagt: edgen kan vara verklig, men nuvarande bevis är inte tillräckligt rent för att säga att strategin är objektivt färdigvaliderad.
